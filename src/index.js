@@ -1,12 +1,59 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Input, Layout } from "antd";
+import { graphql } from "graphql";
+import "antd/dist/antd.css";
+import schema from "./schema";
+import fields from "./fields";
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const { Footer, Sider, Content } = Layout;
+const { TextArea } = Input;
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-serviceWorker.unregister();
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      query: "",
+      result: ""
+    };
+    this.input = this.input.bind(this);
+  }
+
+  input(e) {
+    this.setState({
+      query: e.target.value
+    });
+    this.gql();
+  }
+
+  gql() {
+    graphql(schema, this.state.query).then(result => {
+      this.setState({ result });
+    });
+  }
+
+  render() {
+    return (
+      <Layout>
+        <Sider width={"50%"} theme={"light"}>
+          <TextArea
+            value={this.state.query}
+            onChange={this.input}
+            autosize={{
+              minRows: 35
+            }}
+          />
+        </Sider>
+        <Layout>
+          <Content style={{ margin: "20px", height: "50%" }}>
+            {JSON.stringify(fields)}
+          </Content>
+          <Footer style={{ height: "50%" }}>
+            {JSON.stringify(this.state.result)}
+          </Footer>
+        </Layout>
+      </Layout>
+    );
+  }
+}
+ReactDOM.render(<App />, document.getElementById("root"));
